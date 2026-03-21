@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { MapPin, Heart, ChevronRight, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapPin, Heart, ChevronRight, Calendar, Volume2, VolumeX } from 'lucide-react';
 
 const content = {
   en: {
@@ -12,9 +12,9 @@ const content = {
     dateValue: "May 1, 2026",
     timeLabel: "The Hour",
     timeValue: "9:30 AM - 10:30 AM",
-    addressLabel: "The Location",
+    addressLabel: "Venue",
     addressValue: "M2 House of D2, Plot No 31, Fabnest Nagar, Johnson Nagar Extension, Thyagaraja Nagar, Tirunelveli, TamilNadu - 627011",
-    phoneLabel: "Phone",
+    phoneLabel: "Contact",
     phoneValue: "+91 99408 73958",
     familyLabel: "Warmly invited by",
     familyNames: [
@@ -70,6 +70,8 @@ export default function App() {
   const [lang, setLang] = useState('en');
   const [hasEntered, setHasEntered] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     // Countdown Timer logic (Safely contained)
@@ -89,6 +91,17 @@ export default function App() {
     
     return () => clearInterval(timer);
   }, []);
+
+  // Handle Audio Playback
+  useEffect(() => {
+    if (hasEntered && audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.play().catch(err => console.log("Audio blocked by browser:", err));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying, hasEntered, lang]);
 
   const t = content[lang];
   
@@ -177,14 +190,22 @@ export default function App() {
           
           <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
             <button 
-              onClick={() => { setLang('en'); setHasEntered(true); }} 
+              onClick={() => { 
+                setLang('en'); 
+                setHasEntered(true); 
+                setIsPlaying(true);
+              }} 
               className="px-10 py-4 bg-[#3E2723] text-[#FFF8F0] rounded-full font-semibold tracking-widest uppercase hover:bg-[#C9A227] hover:text-[#3E2723] transition-all shadow-xl active:scale-95"
               style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               English
             </button>
             <button 
-              onClick={() => { setLang('ta'); setHasEntered(true); }} 
+              onClick={() => { 
+                setLang('ta'); 
+                setHasEntered(true); 
+                setIsPlaying(true);
+              }} 
               className="px-10 py-4 bg-white text-[#C9A227] border border-[#C9A227]/30 rounded-full font-semibold tracking-widest uppercase hover:bg-[#C9A227] hover:text-[#FFF8F0] transition-all shadow-lg active:scale-95"
               style={{ fontFamily: "'Noto Sans Tamil', sans-serif" }}
             >
@@ -207,10 +228,28 @@ export default function App() {
     <div className="min-h-screen w-full bg-[#FFF8F0] text-[#3E2723] flex flex-col items-center justify-center relative selection:bg-[#C9A227]/20">
       <FontLinks />
       
+      {/* Hidden Audio Element */}
+      <audio 
+        ref={audioRef} 
+        src={lang === 'en' ? '/bgm-en.mp3' : '/bgm-ta.mp3'} 
+        loop 
+      />
+
       {/* Dynamic Ambient Backgrounds */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[80%] md:w-[40%] h-[40%] bg-[#C9A227]/10 blur-[100px] md:blur-[160px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[80%] md:w-[40%] h-[40%] bg-[#C9A227]/10 blur-[100px] md:blur-[160px] rounded-full animate-pulse transition-all duration-1000" />
+      </div>
+
+      {/* Music Toggle - Top Left */}
+      <div className="absolute top-6 md:top-8 left-6 md:left-10 z-50">
+        <button 
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="bg-white/40 backdrop-blur-xl border border-white/50 text-[#C9A227] p-3 rounded-full shadow-lg active:scale-95 hover:bg-white/60 transition-all duration-300"
+          aria-label="Toggle Music"
+        >
+          {isPlaying ? <Volume2 size={16} /> : <VolumeX size={16} />}
+        </button>
       </div>
 
       {/* Language Switcher - Inside Invitation */}
