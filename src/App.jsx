@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Heart, ChevronRight } from 'lucide-react';
+import { MapPin, Heart, ChevronRight, Calendar } from 'lucide-react';
 
 const content = {
   en: {
@@ -7,16 +7,27 @@ const content = {
     reference: "Ecclesiastes 3:1",
     title: "House Warming",
     blessing: "A BLESSED DEDICATION",
-    welcome: "Join us as we celebrate the beginning of a new chapter.",
+    welcome: "Join us as we commence the beginning of a new chapter.",
     dateLabel: "The Day",
     dateValue: "May 1, 2026",
     timeLabel: "The Hour",
-    timeValue: "10:00 AM",
+    timeValue: "9:30 AM - 10:30 AM",
     addressLabel: "The Location",
-    addressValue: "123 Grace Avenue, Blessing City",
+    addressValue: "M2 House of D2, Plot No 31, Fabnest Nagar, Johnson Nagar Extension, Thyagaraja Nagar, Tirunelveli, TamilNadu - 627011",
+    phoneLabel: "Phone",
+    phoneValue: "+91 99408 73958",
     familyLabel: "Warmly invited by",
-    familyValue: "The Dhinakaran Family",
+    familyNames: [
+      "Mrs CHELLAMMAL",
+      "Mr ARTHUR GURUPATHAM",
+      "Mr VIMAL (Late)",
+      "Mr DHINAKARAN",
+      "Mrs MARY THANAPACKIAM",
+      "Master FLYNN MAXWEL",
+      "Master NOAH MARCUS"
+    ],
     mapBtn: "View Location",
+    addToCalBtn: "Add to Calendar",
     days: "Days",
     hours: "Hrs",
     mins: "Min",
@@ -31,12 +42,23 @@ const content = {
     dateLabel: "திருநாள்",
     dateValue: "மே 1, 2026",
     timeLabel: "நேரம்",
-    timeValue: "காலை 10:00 மணி",
+    timeValue: "காலை 9:30 - 10:30 மணி",
     addressLabel: "இடம்",
-    addressValue: "123 கிரேஸ் அவென்யூ, ஆசீர்வாத நகர்",
+    addressValue: "M2 House of D2, பிளாட் எண் 31, ஃபேப்நெஸ்ட் நகர், ஜான்சன் நகர் விரிவாக்கம், தியாகராஜ நகர், திருநெல்வேலி, தமிழ்நாடு - 627011",
+    phoneLabel: "தொடர்புக்கு",
+    phoneValue: "+91 99408 73958",
     familyLabel: "அன்புடன் அழைக்கும்",
-    familyValue: "தினகரன் குடும்பத்தினர்",
+    familyNames: [
+      "திருமதி செல்லம்மாள்",
+      "திரு ஆர்தர் குருபதம்",
+      "அமரர் விமல்",
+      "திரு தினகரன்",
+      "திருமதி மேரி தனபாக்கியம்",
+      "செல்வன் ஃபிளின் மேக்ஸ்வெல்",
+      "செல்வன் நோவா மார்கஸ்"
+    ],
     mapBtn: "வரைபடம்",
+    addToCalBtn: "காலண்டரில் சேர்",
     days: "நாட்கள்",
     hours: "மணி",
     mins: "நிமிடம்",
@@ -53,7 +75,7 @@ export default function App() {
     // Countdown Timer logic (Safely contained)
     const timer = setInterval(() => {
       const now = new Date().getTime();
-      const target = new Date("2026-05-01T10:00:00").getTime();
+      const target = new Date("2026-05-01T09:30:00").getTime();
       const diff = target - now;
       if (diff > 0) {
         setTimeLeft({
@@ -78,6 +100,53 @@ export default function App() {
   const verseLeading = lang === 'en' ? "leading-relaxed" : "leading-[2]";
   const addressLeading = lang === 'en' ? "leading-relaxed" : "leading-loose";
 
+  const downloadICS = () => {
+    const icsData = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//M2 House of D2 House Warming//EN",
+      "CALSCALE:GREGORIAN",
+      "BEGIN:VEVENT",
+      "SUMMARY:M2 House of D2 House Warming",
+      "DTSTART:20260501T093000",
+      "DTEND:20260501T103000",
+      "LOCATION:M2 House of D2, Plot No 31, Fabnest Nagar, Johnson Nagar Extension, Thyagaraja Nagar, Tirunelveli, TamilNadu - 627011",
+      "DESCRIPTION:Join us as we commence the beginning of a new chapter at M2 House of D2.",
+      "STATUS:CONFIRMED",
+      "SEQUENCE:1",
+      "BEGIN:VALARM",
+      "TRIGGER:-P7D",
+      "DESCRIPTION:Reminder: M2 House of D2 House Warming is in 1 week!",
+      "ACTION:DISPLAY",
+      "END:VALARM",
+      "BEGIN:VALARM",
+      "TRIGGER:-P3D",
+      "DESCRIPTION:Reminder: M2 House of D2 House Warming is in 3 days!",
+      "ACTION:DISPLAY",
+      "END:VALARM",
+      "BEGIN:VALARM",
+      "TRIGGER:-P1D",
+      "DESCRIPTION:Reminder: M2 House of D2 House Warming is tomorrow!",
+      "ACTION:DISPLAY",
+      "END:VALARM",
+      "BEGIN:VALARM",
+      "TRIGGER:-PT2H",
+      "DESCRIPTION:Reminder: M2 House of D2 House Warming is in 2 hours!",
+      "ACTION:DISPLAY",
+      "END:VALARM",
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ].join("\r\n");
+
+    const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute('download', 'M2_House_of_D2_House_Warming.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Shared Head Tags (Fonts)
   const FontLinks = () => (
     <link 
@@ -89,7 +158,7 @@ export default function App() {
   // Landing Screen
   if (!hasEntered) {
     return (
-      <div className="min-h-screen w-full bg-[#FFF8F0] text-[#2E2E2E] flex flex-col items-center justify-center relative selection:bg-[#C9A227]/20">
+      <div className="min-h-screen w-full bg-[#FFF8F0] text-[#3E2723] flex flex-col items-center justify-center relative selection:bg-[#C9A227]/20">
         <FontLinks />
         
         <div className="fixed inset-0 pointer-events-none">
@@ -99,7 +168,7 @@ export default function App() {
         
         <div className="z-10 flex flex-col items-center animate-fade-in p-8 text-center bg-white/30 backdrop-blur-md rounded-3xl border border-white/50 shadow-2xl">
           <Heart size={32} className="text-[#C9A227] mb-6 opacity-80 animate-pulse" />
-          <h1 className="text-xl md:text-2xl font-light mb-2 text-[#2E2E2E] tracking-[0.2em] uppercase" style={{ fontFamily: "'Cinzel', serif" }}>
+          <h1 className="text-xl md:text-2xl font-light mb-2 text-[#3E2723] tracking-[0.2em] uppercase" style={{ fontFamily: "'Cinzel', serif" }}>
             Choose Language
           </h1>
           <p className="text-sm text-[#8B5E3C] mb-8" style={{ fontFamily: "'Noto Sans Tamil', sans-serif" }}>
@@ -109,7 +178,7 @@ export default function App() {
           <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
             <button 
               onClick={() => { setLang('en'); setHasEntered(true); }} 
-              className="px-10 py-4 bg-[#2E2E2E] text-[#FFF8F0] rounded-full font-semibold tracking-widest uppercase hover:bg-[#C9A227] hover:text-[#2E2E2E] transition-all shadow-xl active:scale-95"
+              className="px-10 py-4 bg-[#3E2723] text-[#FFF8F0] rounded-full font-semibold tracking-widest uppercase hover:bg-[#C9A227] hover:text-[#3E2723] transition-all shadow-xl active:scale-95"
               style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               English
@@ -135,7 +204,7 @@ export default function App() {
 
   // Main Invitation
   return (
-    <div className="min-h-screen w-full bg-[#FFF8F0] text-[#2E2E2E] flex flex-col items-center justify-center relative selection:bg-[#C9A227]/20">
+    <div className="min-h-screen w-full bg-[#FFF8F0] text-[#3E2723] flex flex-col items-center justify-center relative selection:bg-[#C9A227]/20">
       <FontLinks />
       
       {/* Dynamic Ambient Backgrounds */}
@@ -174,7 +243,7 @@ export default function App() {
 
         {/* 2. Scripture */}
         <div className="flex-shrink-0 animate-fade-in delay-1 text-center max-w-[90%] md:max-w-full">
-          <p className={`text-[#2E2E2E] text-lg md:text-2xl font-light mb-4 italic opacity-80 px-2 ${verseLeading}`} style={{ fontFamily: serifFont }}>
+          <p className={`text-[#3E2723] text-lg md:text-2xl font-light mb-4 italic opacity-80 px-2 ${verseLeading}`} style={{ fontFamily: serifFont }}>
             "{t.verse}"
           </p>
           <div className="h-[1px] w-12 md:w-16 bg-[#C9A227]/40 mx-auto" />
@@ -185,6 +254,13 @@ export default function App() {
 
         {/* 3. Hero Title */}
         <div className="flex-shrink-0 animate-fade-in delay-2 text-center">
+          <div className="flex items-center justify-center gap-2 md:gap-4 mb-2">
+            <div className="h-px w-6 md:w-12 bg-[#C9A227]/50" />
+            <span className="text-[#C9A227] text-lg md:text-xl font-black tracking-widest uppercase text-center px-2" style={{ fontFamily: serifFont }}>
+              M2 House of D2
+            </span>
+            <div className="h-px w-6 md:w-12 bg-[#C9A227]/50" />
+          </div>
           <h1 className={`text-4xl md:text-6xl font-black glossy-gold mb-3 md:mb-4 uppercase relative py-1 ${titleTracking} ${titleLeading}`} style={{ fontFamily: serifFont }}>
             {t.title}
           </h1>
@@ -193,22 +269,38 @@ export default function App() {
           </p>
         </div>
 
-        {/* 4. Details Section */}
-        <div className="w-full flex flex-col md:flex-row items-center justify-around gap-6 md:gap-4 flex-shrink-0 animate-fade-in delay-3 py-4">
-          <div className="flex flex-col items-center gap-1 md:w-1/3">
-            <p className="text-[8px] md:text-[9px] text-[#C9A227] font-bold tracking-[0.3em] uppercase" style={{ fontFamily: sansFont }}>{t.dateLabel}</p>
-            <p className="text-base md:text-lg font-medium tracking-tight text-[#2E2E2E]" style={{ fontFamily: sansFont }}>{t.dateValue}</p>
+        {/* 4. Details Section - Adjusted Layout for Long Content */}
+        <div className="w-full flex flex-col items-center gap-5 md:gap-6 flex-shrink-0 animate-fade-in delay-3 py-2 md:py-4">
+          
+          {/* Date & Time Row */}
+          <div className="w-full flex flex-row items-center justify-center gap-8 md:gap-16">
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-[8px] md:text-[9px] text-[#C9A227] font-bold tracking-[0.3em] uppercase" style={{ fontFamily: sansFont }}>{t.dateLabel}</p>
+              <p className="text-sm md:text-base font-medium tracking-tight text-[#3E2723] whitespace-nowrap" style={{ fontFamily: sansFont }}>{t.dateValue}</p>
+            </div>
+            
+            <div className="h-8 w-px bg-[#C9A227]/30" />
+            
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-[8px] md:text-[9px] text-[#C9A227] font-bold tracking-[0.3em] uppercase" style={{ fontFamily: sansFont }}>{t.timeLabel}</p>
+              <p className="text-sm md:text-base font-medium tracking-tight text-[#3E2723] whitespace-nowrap" style={{ fontFamily: sansFont }}>{t.timeValue}</p>
+            </div>
           </div>
-          <div className="hidden md:block h-8 w-px bg-[#C9A227]/20" />
-          <div className="flex flex-col items-center gap-1 md:w-1/3">
-            <p className="text-[8px] md:text-[9px] text-[#C9A227] font-bold tracking-[0.3em] uppercase" style={{ fontFamily: sansFont }}>{t.timeLabel}</p>
-            <p className="text-base md:text-lg font-medium tracking-tight text-[#2E2E2E]" style={{ fontFamily: sansFont }}>{t.timeValue}</p>
-          </div>
-          <div className="hidden md:block h-8 w-px bg-[#C9A227]/20" />
-          <div className="flex flex-col items-center gap-1 md:w-1/3">
+
+          {/* Location Row */}
+          <div className="flex flex-col items-center gap-1.5 w-full max-w-lg px-2 mt-2">
             <p className="text-[8px] md:text-[9px] text-[#C9A227] font-bold tracking-[0.3em] uppercase" style={{ fontFamily: sansFont }}>{t.addressLabel}</p>
-            <p className={`text-sm md:text-base font-medium tracking-tight text-[#2E2E2E] text-center px-2 ${addressLeading}`} style={{ fontFamily: sansFont }}>{t.addressValue}</p>
+            <p className={`text-[11px] md:text-[13px] font-medium tracking-wide text-[#3E2723] text-center ${addressLeading}`} style={{ fontFamily: sansFont }}>
+              {t.addressValue}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[8px] md:text-[9px] text-[#C9A227] font-bold tracking-[0.3em] uppercase" style={{ fontFamily: sansFont }}>{t.phoneLabel}</span>
+              <a href="tel:+919940873958" className="text-[11px] md:text-[13px] font-semibold tracking-wider text-[#3E2723] hover:text-[#C9A227] transition-colors" style={{ fontFamily: sansFont }}>
+                {t.phoneValue}
+              </a>
+            </div>
           </div>
+          
         </div>
 
         {/* 5. Countdown */}
@@ -220,7 +312,7 @@ export default function App() {
             { v: timeLeft.seconds, l: t.secs }
           ].map((item, i) => (
             <div key={i} className="flex flex-col items-center w-1/4">
-              <span className="text-xl md:text-3xl font-semibold text-[#2E2E2E] tabular-nums tracking-tighter" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              <span className="text-xl md:text-3xl font-semibold text-[#3E2723] tabular-nums tracking-tighter" style={{ fontFamily: "'Poppins', sans-serif" }}>
                 {String(item.v).padStart(2, '0')}
               </span>
               <span className="text-[7px] md:text-[8px] font-bold text-[#C9A227] uppercase tracking-widest mt-1 opacity-60" style={{ fontFamily: sansFont }}>{item.l}</span>
@@ -229,24 +321,37 @@ export default function App() {
         </div>
 
         {/* 6. Action Bar */}
-        <div className="w-full flex flex-col items-center gap-6 md:gap-4 flex-shrink-0 animate-fade-in delay-5">
-           <div className="text-center">
-              <p className="text-[#8B5E3C] text-[9px] md:text-[10px] tracking-[0.4em] font-bold uppercase mb-1 opacity-60" style={{ fontFamily: sansFont }}>{t.familyLabel}</p>
-              <p className="text-2xl md:text-3xl font-bold text-[#2E2E2E] uppercase" style={{ fontFamily: serifFont }}>
-                {t.familyValue}
-              </p>
+        <div className="w-full flex flex-col items-center gap-6 md:gap-8 flex-shrink-0 animate-fade-in delay-5 mt-4">
+           <div className="text-center w-full">
+              <p className="text-[#8B5E3C] text-[9px] md:text-[10px] tracking-[0.4em] font-bold uppercase mb-3 opacity-60" style={{ fontFamily: sansFont }}>{t.familyLabel}</p>
+              <div className="flex flex-col items-center gap-1.5 md:gap-2">
+                {t.familyNames.map((name, index) => (
+                  <p key={index} className="text-[13px] md:text-[15px] font-bold text-[#3E2723] uppercase tracking-wider" style={{ fontFamily: serifFont }}>
+                    {name}
+                  </p>
+                ))}
+              </div>
            </div>
            
-           <div className="flex w-full gap-3 md:gap-4 max-w-xs md:max-w-md">
+           <div className="flex flex-col sm:flex-row w-full gap-3 md:gap-4 max-w-xs md:max-w-md">
             <a 
-              href="https://maps.google.com" 
-              className="w-full py-4 bg-[#2E2E2E] text-white rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold text-[10px] tracking-widest uppercase active:scale-95 hover:bg-[#1a1a1a] transition-all duration-300"
+              href="https://goo.gl/maps/J8iWPyPLmCADpiXG9?g_st=aw" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-4 bg-[#3E2723] text-white rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold text-[10px] tracking-widest uppercase active:scale-95 hover:bg-[#261714] transition-all duration-300"
               style={{ fontFamily: sansFont }}
             >
               <MapPin size={14} />
               {t.mapBtn}
-              <ChevronRight size={14} className="opacity-50" />
             </a>
+            <button 
+              onClick={downloadICS}
+              className="flex-1 py-4 bg-white text-[#3E2723] border border-[#C9A227]/30 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold text-[10px] tracking-widest uppercase active:scale-95 hover:bg-[#FFF8F0] transition-all duration-300"
+              style={{ fontFamily: sansFont }}
+            >
+              <Calendar size={14} />
+              {t.addToCalBtn}
+            </button>
           </div>
         </div>
 
